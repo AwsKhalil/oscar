@@ -7,7 +7,12 @@
 |![](imgs4readme/Screenshot%20from%202023-02-02%2015-49-35.png) |![](imgs4readme/Screenshot%20from%202023-02-02%2015-49-47.png) |
 
 ## History
-
+- 9/22/2023:
+  - New Gazebo plugin for the IMU sensor
+  - Added a new node (Acceleration) which calculates the acceleration based on velocity and time
+  - Modified the data_colllection node to include IMU data, heading, and acceleration.
+  - Modified the data_colllection node by adding time Synchronizing.
+  
 - 3/11/2021: 
   - Removed unused plugins that are not compatible with Gazebo-11.
   - Works with Gazebo-11 as well. 
