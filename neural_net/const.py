@@ -11,13 +11,14 @@ History:
 # constant definition
 
 # network model type
-NET_TYPE_JAEROCK       = 0
-NET_TYPE_CE491         = 1
-NET_TYPE_JAEROCK_VEL   = 2
-NET_TYPE_JAEROCK_SHIFT = 3 
-NET_TYPE_STR_THR_BRK   = 4
+NET_TYPE_JAEROCK                   = 0
+NET_TYPE_CE491                     = 1
+NET_TYPE_JAEROCK_VEL               = 2
+NET_TYPE_JAEROCK_SHIFT             = 3 
+NET_TYPE_STR_THR_BRK               = 4
 
-NET_TYPE_CONVLSTM    = 10
+NET_TYPE_CONVLSTM                  = 10
+NET_TYPE_ROVER_MULTICLASS_STR      = 12
 
 # file extension
 DATA_EXT             = '.csv'
