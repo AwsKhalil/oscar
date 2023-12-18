@@ -22,9 +22,10 @@
       - collect_data_fusion.sh 
     - oscar/catkin_ws/src
       - added the "acceleration" package
+      - added data_collection/scripts/data_collection_sync3.py
       - fusion/robot_description/urdf/fusion.urdf
-      - data_collection/scripts/data_collection.py
       - fusion/launch/sitl.launch
+      - added 3 files to fusion/worlds
       - run_neural/scripts/run_neural.py
         
     - oscar/config:
