@@ -156,9 +156,12 @@ A `world` can be selected through a command line argument. Three worlds are read
 - `track_jaerock`: This is default. No need to specified.
 - `sonoma_raceway`: racetrack
 - `mcity_jaerock`: mcity
+- `track_aws_ANEC`: training track 3 lanes instead of 2
+- `track_aws_ANEC_test`: testing track 3 lanes instead of 2
+- `track_aws_smc`: The start and end points are not the same in this track
 
 ```
-(oscar) $ ./start_fusion.sh {sonoma_raceway|mcity_jaerock}
+(oscar) $ ./start_fusion.sh track_aws_ANEC
 ```
 
 ### rover 
@@ -185,7 +188,7 @@ Then the `rover` is ready to be controlled by the topic `/mavros/setpoint_veloci
 
 Run the script with a data ID as an argument.
 ```
-(oscar) $ ./collect_data_fusion jaerock
+(oscar) $ ./collect_data_fusion data1
 ```
 
 The default data folder location is `$(pwd)e2e_{fusion/rover}_data`.
@@ -194,12 +197,21 @@ The default data folder location is `$(pwd)e2e_{fusion/rover}_data`.
 
 From `data_collection` config version 0.92, the CSV file has one more column for `brake`. Use `convert_csv.py` to convert a data CSV file collected before 0.92 to a new CSV file.
 
-#### From Version 0.92
+#### From Version 2023
 
-Data Collection will save a csv file with images. The CSV file has following columns
+Data Collection will save a csv file with images. The CSV file has the following columns
 
 ```
-image_file_name / steering_angle / throttle / brake / linux_time / velocity / velocity_x / velocity_y / velocity_z / position_x / position_y / position_z
+image_file_name / steering_angle / throttle / brake / linux_time / velocity / velocity_x / velocity_y / velocity_z / position_x / position_y / position_z/ imu_acceleration_x / imu_acceleration_z / imu_acceleration_z / yaw_rate / heading / calculated_acceleration / time_stamp
+
+```
+
+#### From Version 0.92
+
+Data Collection will save a csv file with images. The CSV file has the following columns
+
+```
+image_file_name / steering_angle / throttle / brake / linux_time / velocity / velocity_x / velocity_y / velocity_z / position_x / position_y / position_z 
 
 ```
 
@@ -210,7 +222,7 @@ image_file_name / steering_angle / throttle / brake / linux_time / velocity / ve
 
 #### Before Version 0.92
 
-Data Collection will save a csv file with images. The CSV file has following columns
+Data Collection will save a csv file with images. The CSV file has the following columns
 
 ```
 image_file_name / steering_angle / throttle / linux_time / velocity / velocity_x / velocity_y / velocity_z / position_x / position_y / position_z
