@@ -26,7 +26,7 @@
       - data_collection/scripts/data_collection.py
       - fusion/launch/sitl.launch
       - run_neural/scripts/run_neural.py
-      - 
+        
     - oscar/config:
       - config.yaml
       - added new config files
