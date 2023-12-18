@@ -4,8 +4,7 @@
 Created on Sat Sep 23 13:23:14 2017
 History:
 11/28/2020: modified for OSCAR 
-
-@author: jaerock
+12/17/2023: modified by Aws
 """
 
 from datetime import datetime
@@ -25,6 +24,15 @@ from data_augmentation import DataAugmentation
 
 config = Config.neural_net
 
+def min_max_scaling(data):
+    min_val = np.min(data)
+    max_val = np.max(data)
+    scaled_data = (data - min_val) / (max_val - min_val)
+    return scaled_data
+
+def is_min_max_normalized(data):
+    return np.all((data >= 0) & (data <= 1))
+
 ###############################################################################
 #
 class DriveTrain:
@@ -42,13 +50,15 @@ class DriveTrain:
             #model_name = model_name.strip('/')
         else:
             model_name = data_path
-        csv_path = data_path + '/' + model_name + const.DATA_EXT  # use it for csv file name 
+
+        
+        csv_path = data_path + '/' + model_name + const.DATA_EXT  # use it for csv file name
         
         self.csv_path = csv_path
         self.train_generator = None
         self.valid_generator = None
         self.train_hist = None
-        self.data = None
+        self.drive = None
         
         #self.config = Config() #model_name)
         
@@ -72,8 +82,17 @@ class DriveTrain:
     
         self.data.read()
         
-        # put velocities regardless we use them or not for simplicity.
-        samples = list(zip(self.data.image_names, self.data.velocities, self.data.measurements))
+        # Normalize velocity and acceleration
+        self.data.velocities = min_max_scaling(self.data.velocities)
+        if is_min_max_normalized(self.data.velocities):
+            print("Velocity data is Min-Max Normalized")
+        self.data.calculated_accelerations = min_max_scaling(self.data.calculated_accelerations)
+        if is_min_max_normalized(self.data.calculated_accelerations):
+            print("Acceleration data is Min-Max Normalized")
+
+        # put velocities and accelerations regardless we use them or not for simplicity.
+        samples = list(zip(self.data.image_names, self.data.velocities, self.data.calculated_accelerations, self.data.actions))
+        
 
         if config['lstm'] is True:
             self.train_data, self.valid_data = self._prepare_lstm_data(samples)
@@ -150,9 +169,10 @@ class DriveTrain:
         def _prepare_batch_samples(batch_samples):
             images = []
             velocities = []
-            measurements = []
+            accelerations = []
+            actions = []
 
-            for image_name, velocity, measurement in batch_samples:
+            for image_name, velocity, acceleration, action in batch_samples:
                 
                 image_path = self.data_path + '/' + image_name
                 image = cv2.imread(image_path)
@@ -169,30 +189,36 @@ class DriveTrain:
                 image = self.image_process.process(image)
                 images.append(image)
                 velocities.append(velocity)
+                accelerations.append(acceleration)
 
                 # if no brake data in collected data, brake values are dummy
-                steering_angle, throttle, brake = measurement
+                steering_angle, throttle, brake, throttle_brake = action
                 
                 if abs(steering_angle) < config['steering_angle_jitter_tolerance']:
                     steering_angle = 0
 
-                if config['num_outputs'] == 2:                
-                    measurements.append((steering_angle*config['steering_angle_scale'], throttle))
+                if config['num_outputs'] == 3:
+                    actions.append((steering_angle*config['steering_angle_scale'], throttle, brake, throttle_brake))
+                elif config['num_outputs'] == 2:
+                    actions.append((steering_angle*config['steering_angle_scale'], throttle))
                 else:
-                    measurements.append(steering_angle*config['steering_angle_scale'])
+                    actions.append(steering_angle*config['steering_angle_scale'])
 
                 # data augmentation
                 append, image, steering_angle = _data_augmentation(image, steering_angle)
                 if append is True:
                     images.append(image)
                     velocities.append(velocity)
+                    accelerations.append(acceleration)
 
-                    if config['num_outputs'] == 2:                
-                        measurements.append((steering_angle*config['steering_angle_scale'], throttle))
+                    if config['num_outputs'] == 3:
+                        actions.append((steering_angle*config['steering_angle_scale'], throttle, brake, throttle_brake))
+                    elif config['num_outputs'] == 2:
+                        actions.append((steering_angle*config['steering_angle_scale'], throttle))
                     else:
-                        measurements.append(steering_angle*config['steering_angle_scale'])
-
-            return images, velocities, measurements
+                        actions.append(steering_angle*config['steering_angle_scale'])
+            
+            return images, velocities, accelerations, actions
 
         def _prepare_lstm_batch_samples(batch_samples):
             images = []
@@ -253,6 +279,7 @@ class DriveTrain:
                 measurements.append(measurements_timestep)
 
             return images, velocities, measurements
+             
 
         def _generator(samples, batch_size=config['batch_size']):
             num_samples = len(samples)
@@ -270,28 +297,44 @@ class DriveTrain:
                         if config['num_inputs'] == 2:
                             X_train_vel = np.array(velocities).reshape(-1,config['lstm_timestep'],1)
                             X_train = [X_train, X_train_vel]
-                        if config['num_outputs'] == 2:
+                        if config['num_outputs'] > 1:
                             y_train = np.stack(measurements).reshape(-1,config['num_outputs'])
                             
-                        yield X_train, y_train
-                        
+                        yield X_train, y_train              
+
                 else: 
                     samples = sklearn.utils.shuffle(samples)
 
                     for offset in range(0, num_samples, batch_size):
                         batch_samples = samples[offset:offset+batch_size]
 
-                        images, velocities, measurements = _prepare_batch_samples(batch_samples)
+                        images, velocities, accelerations, actions = _prepare_batch_samples(batch_samples)
+                        # print('#################')
+                        # print(len(images), len(velocities), len(actions))
+                        # print('#################')
                         X_train = np.array(images).reshape(-1, 
                                           config['input_image_height'],
                                           config['input_image_width'],
                                           config['input_image_depth'])
-                        y_train = np.array(measurements)
-                        y_train = y_train.reshape(-1, 1)
+                        # y_train_combined = np.array(actions)
+                        # y_train = [y_train_combined[0]]
+
+                        # Assuming 'actions' is a list of tuples where each tuple contains (steering, throttle, brake)
+                        # Modify this part based on the actual structure of your 'actions' variable
+                        steering_true = np.array([action[0] for action in actions]).reshape(-1, 1)
+                        # throttle_brake_true = np.array([(action[1], action[2]) for action in actions])
+                        throttle_brake_true = np.array([(action[3]) for action in actions]).reshape(-1, 1)
+
+                        # Combine the steering and throttle_brake arrays
+                        y_train = [steering_true, throttle_brake_true]
                         
                         if config['num_inputs'] == 2:
                             X_train_vel = np.array(velocities).reshape(-1, 1)
                             X_train = [X_train, X_train_vel]
+                        elif config['num_inputs'] == 3:
+                            X_train_vel = np.array(velocities).reshape(-1, 1)
+                            X_train_acc = np.array(accelerations).reshape(-1, 1)
+                            X_train = [X_train, X_train_vel, X_train_acc]                        
                             
                         yield X_train, y_train
         
@@ -302,7 +345,7 @@ class DriveTrain:
             self.net_model.model.summary()
     
     ###########################################################################
-    #
+    
     def _start_training(self):
         
         if (self.train_generator == None):
@@ -332,7 +375,9 @@ class DriveTrain:
         tensorboard = TensorBoard(log_dir=logdir)
         callbacks.append(tensorboard)
 
-
+        # print('###########')
+        # print(self.net_model.model.metrics_names)
+        # print('###########')
         self.train_hist = self.net_model.model.fit_generator(
                 self.train_generator, 
                 steps_per_epoch=self.num_train_samples//config['batch_size'], 
