@@ -10,40 +10,40 @@
 - 12/17/2023:
   
   - **Overview**:
-  - New Gazebo plugin for the IMU sensor
-  - New node (Acceleration) which calculates the acceleration based on velocity and time
-  - Modified the data_colllection node to include IMU data, heading, and acceleration.
-  - Modified the data_colllection node by adding time Synchronizing.
-  - New driving model (input: [image, velocity, acceleration] --> output: [steering, throttle, brake])
+    - New Gazebo plugin for the IMU sensor
+    - New node (Acceleration) which calculates the acceleration based on velocity and time
+    - Modified the data_colllection node to include IMU data, heading, and acceleration.
+    - Modified the data_colllection node by adding time Synchronizing.
+    - New driving model (input: [image, velocity, acceleration] --> output: [steering, throttle, brake])
 
   - **Detailed modifications**:
-  - oscar/
-    - start_fusion.sh
-    - collect_data_fusion.sh 
-  - oscar/catkin_ws/src
-    - added the "acceleration" package
-    - fusion/robot_description/urdf/fusion.urdf
-    - data_collection/scripts/data_collection.py
-    - fusion/launch/sitl.launch
-    - run_neural/scripts/run_neural.py
-    - 
-  - oscar/config:
-    - config.yaml
-    - added new config files
-      - data_collection/fusion_aws.yaml
-      - neural_net/fusion_template_aws.yaml
-      - run_neural/fusion_template_aws.yaml
-    
-  - oscar/neural_net
-    - const.py
-    - drive_data.py
-    - drive_log.py
-    - drive_run.py
-    - drive_train.py
-    - image_process.py
-    - net_model.py
-    - rebuild_csv.py
-    - train.py
+    - oscar/
+      - start_fusion.sh
+      - collect_data_fusion.sh 
+    - oscar/catkin_ws/src
+      - added the "acceleration" package
+      - fusion/robot_description/urdf/fusion.urdf
+      - data_collection/scripts/data_collection.py
+      - fusion/launch/sitl.launch
+      - run_neural/scripts/run_neural.py
+      - 
+    - oscar/config:
+      - config.yaml
+      - added new config files
+        - data_collection/fusion_aws.yaml
+        - neural_net/fusion_template_aws.yaml
+        - run_neural/fusion_template_aws.yaml
+      
+    - oscar/neural_net
+      - const.py
+      - drive_data.py
+      - drive_log.py
+      - drive_run.py
+      - drive_train.py
+      - image_process.py
+      - net_model.py
+      - rebuild_csv.py
+      - train.py
       
 
   
