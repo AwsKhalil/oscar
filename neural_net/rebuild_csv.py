@@ -4,10 +4,8 @@
 Created on Sat Sep 23 12:23:14 2019
 History:
 11/28/2020: modified for OSCAR 
-
-@author: jaerock
+12/17/2023: modified by Aws
 """
-
 
 import sys
 import os
@@ -48,29 +46,43 @@ def build_csv(data_path):
         if os.path.exists(data_path + data.image_names[i]):
             if Config.data_collection['brake'] is True:
                 new_csv.append(data.image_names[i] + ','
-                            + str(data.measurements[i][0]) + ','
-                            + str(data.measurements[i][1]) + ','
-                            + str(data.measurements[i][2]) + ',' # brake
-                            + str(data.time_stamps[i]) + ','
+                            + str(data.actions[i][0]) + ','
+                            + str(data.actions[i][1]) + ','
+                            + str(data.actions[i][2]) + ',' # brake
+                            + str(data.linux_times[i]) + ','
                             + str(data.velocities[i]) + ','
                             + str(data.velocities_xyz[i][0]) + ','
                             + str(data.velocities_xyz[i][1]) + ','
                             + str(data.velocities_xyz[i][2]) + ','
                             + str(data.positions_xyz[i][0]) + ','
                             + str(data.positions_xyz[i][1]) + ','
-                            + str(data.positions_xyz[i][2]) + '\n')
+                            + str(data.positions_xyz[i][2]) + ','                           
+                            + str(data.imu_accelerations_xyz[i][0]) + ','
+                            + str(data.imu_accelerations_xyz[i][1]) + ','
+                            + str(data.imu_accelerations_xyz[i][2]) + ','
+                            + str(data.yaw_rates_and_headings[i][0]) + ','
+                            + str(data.yaw_rates_and_headings[i][1]) + ','
+                            + str(data.calculated_accelerations[i]) + ',' 
+                            + str(data.time_stamps[i]) +'\n')
             else:
                 new_csv.append(data.image_names[i] + ','
-                            + str(data.measurements[i][0]) + ','
-                            + str(data.measurements[i][1]) + ','
-                            + str(data.time_stamps[i]) + ','
+                            + str(data.actions[i][0]) + ','
+                            + str(data.actions[i][1]) + ','
+                            + str(data.linux_times[i]) + ','
                             + str(data.velocities[i]) + ','
                             + str(data.velocities_xyz[i][0]) + ','
                             + str(data.velocities_xyz[i][1]) + ','
                             + str(data.velocities_xyz[i][2]) + ','
                             + str(data.positions_xyz[i][0]) + ','
                             + str(data.positions_xyz[i][1]) + ','
-                            + str(data.positions_xyz[i][2]) + '\n')
+                            + str(data.positions_xyz[i][2]) + ','
+                            + str(data.imu_accelerations_xyz[i][0]) + ','
+                            + str(data.imu_accelerations_xyz[i][1]) + ','
+                            + str(data.imu_accelerations_xyz[i][2]) + ','
+                            + str(data.yaw_rates_and_headings[i][0]) + ','
+                            + str(data.yaw_rates_and_headings[i][1]) + ','
+                            + str(data.calculated_accelerations[i]) + ',' 
+                            + str(data.time_stamps[i]) +'\n')
 
 
     # write a new csv
