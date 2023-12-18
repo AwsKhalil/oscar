@@ -37,6 +37,7 @@
       
     - oscar/neural_net
       - const.py
+      - data_augmentation.py
       - drive_data.py
       - drive_log.py
       - drive_run.py
