@@ -4,13 +4,20 @@
 Created on Sat Sep 23 13:23:14 2017
 History:
 11/28/2020: modified for OSCAR 
-
-@author: jaerock
+12/17/2023: modified by Aws
+@author: aws
 """
 
+import cv2
 import numpy as np
 from net_model import NetModel
 from config import Config
+from image_process import ImageProcess
+
+
+def min_max_norm(in_data, in_max, in_min):
+    scaled_data = (in_data-in_min)/(in_max-in_min)
+    return scaled_data
 
 ###############################################################################
 #
@@ -22,6 +29,7 @@ class DriveRun:
     def __init__(self, model_path):
         
         #self.config = Config()
+        self.image_process = ImageProcess()
         self.net_model = NetModel(model_path)   
         self.net_model.load()
 
@@ -29,19 +37,36 @@ class DriveRun:
     #
     def run(self, input): # input is (image, (vel))
         image = input[0]
+        
+        #The block below is commented out because the input image is already processed in 
+        # NeuralControl
+        #######################################################################################
+        # image = cv2.resize(image, (Config.neural_net['input_image_width'],
+        #                                 Config.neural_net['input_image_height']))
+        # image = self.image_process.process(image)
+        ######################################################################################
+
+        npimg = np.expand_dims(image, axis=0)
+
         if Config.neural_net['num_inputs'] == 2:
             velocity = input[1]
-        np_img = np.expand_dims(image, axis=0)
-        #np_img = np.array(np_img).reshape(-1, 
-        #                                  Config.neural_net['input_image_height'],
-        #                                  Config.neural_net['input_image_width'],
-        #                                  Config.neural_net['input_image_depth'])
+            velocity = min_max_norm(velocity, Config.run_neural['max_vel'], 0.0)
+            np_velocity = np.array(velocity).reshape(-1, 1)
+
+        elif Config.neural_net['num_inputs'] == 3:
+            velocity = input[1]
+            velocity = min_max_norm(velocity, Config.run_neural['max_vel'], 0.0)
+            np_velocity = np.array(velocity).reshape(-1, 1)
+            acceleration = input[2]
+            acceleration = min_max_norm(acceleration, 3.0, 0.0)
+            np_acceleration = np.array(acceleration).reshape(-1,1)
         
-        if Config.neural_net['num_inputs'] == 2:
-            velocity = np.array(velocity).reshape(-1, 1)
-            predict = self.net_model.model.predict([np_img, velocity])
+        if Config.neural_net['num_inputs'] == 3:
+            predict = self.net_model.model.predict([npimg, np_velocity, np_acceleration])
+        elif Config.neural_net['num_inputs'] == 2:
+            predict = self.net_model.model.predict([npimg, np_velocity])
         else:
-            predict = self.net_model.model.predict(np_img)
+            predict = self.net_model.model.predict(npimg)
 
         # calc scaled steering angle
         steering_angle = predict[0][0]
