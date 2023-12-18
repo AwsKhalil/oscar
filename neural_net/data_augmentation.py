@@ -29,7 +29,10 @@ class DataAugmentation():
 
     def flipping(self, img, steering):
         flip_image = cv2.flip(img,1)
-        flip_steering = steering*-1.0
+        if config['network_type'] == const.NET_TYPE_ROVER_MULTICLASS_STR:
+            flip_steering = np.flip(steering,axis=0) #flips the one hot encoded class
+        else:
+            flip_steering = steering*-1.0
         return flip_image, flip_steering
 
     def brightness(self, img):
