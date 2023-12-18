@@ -15,9 +15,10 @@
   <arg name="urdf_model" default="$(find fusion)/robot_description/urdf/$(arg vehicle).urdf"/>
 
   <arg name="rvizconfig" default="$(find fusion)/rviz/$(arg vehicle)_track.rviz" />
-
+  
   <param if="$(arg use_sdf)" name="robot_description" textfile="$(arg urdf_model_for_rviz)" />
   <param unless="$(arg use_sdf)" name="robot_description" textfile="$(arg urdf_model)" />
+  <param name="use_sim_time" value="true"/>
 
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="paused" default="false"/>
@@ -43,7 +44,10 @@
   <node pkg="joy" type="joy_node" name="joy_node0">
     <param name="dev" value="/dev/input/js0"/>
   </node>
-
+  <!-- Run the acceleration node which calculated the acceleration (delta_velocity/delta_time) -->
+  <node pkg="acceleration" type="calc_acceleration3.py" name="acceleration"/>
+  
+  
   <!-- **** gazebo model **** -->
   <!-- sdf version ## experimental: do not use yet. -->
   <node if="$(arg use_sdf)" name="$(anon vehicle_spawn)" pkg="gazebo_ros" type="spawn_model" output="screen" args="-sdf -file $(arg sdf_model) -model $(arg vehicle) -x $(arg x) -y $(arg y) -z $(arg z) -R $(arg R) -P $(arg P) -Y $(arg Y)"/>
