@@ -15,7 +15,7 @@ We propose the Adaptive Neural Ensemble Controller (ANEC), by which we show algo
 
 ## General steps to use ANEC:
 1. Download ANEC source code.
-     * Understant the directory structure.
+     * Understand the directory structure.
 2. Create the conda environment.
      * Activate the environment
 3. Start OSCAR with the fusion vehicle.
