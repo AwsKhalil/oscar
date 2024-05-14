@@ -1,5 +1,5 @@
 
-<img src="plm-net-imgs/method-intro.png" alt="drawing" width="600"/>
+<img src="plm-net-imgs/method-intro.jpg" alt="drawing" width="800"/>
 
 
 
